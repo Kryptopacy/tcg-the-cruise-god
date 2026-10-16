@@ -52,6 +52,47 @@ async function insertSupabase(table: string, body: Record<string, any>): Promise
   }
 }
 
+async function queryQlooTaste(entity: string, targetDomain: string = 'places'): Promise<any[]> {
+  const apiKey = process.env.QLOO_API_KEY;
+  if (!apiKey) return [];
+
+  try {
+    const searchRes = await fetch(`https://hackathon.api.qloo.com/v2/search?query=${encodeURIComponent(entity)}`, {
+      headers: { 'X-Api-Key': apiKey },
+    });
+    if (!searchRes.ok) return [];
+    const searchData = await searchRes.json();
+    const entityId = searchData.results?.[0]?.entity_id;
+    if (!entityId) return [];
+
+    const domainLower = targetDomain.toLowerCase();
+    const filterType = domainLower.includes('brand') || domainLower.includes('fashion')
+      ? 'urn:entity:brand'
+      : domainLower.includes('movie') || domainLower.includes('film')
+      ? 'urn:entity:movie'
+      : domainLower.includes('music') || domainLower.includes('artist')
+      ? 'urn:entity:artist'
+      : 'urn:entity:place';
+
+    const insightsRes = await fetch(
+      `https://hackathon.api.qloo.com/v2/insights?entity_ids=${entityId}&filter.type=${filterType}`,
+      { headers: { 'X-Api-Key': apiKey } }
+    );
+    if (!insightsRes.ok) return [];
+    const insightsData = await insightsRes.json();
+    const entities = insightsData.results?.entities || [];
+    return entities.slice(0, 4).map((e: any) => ({
+      name: e.name,
+      type: e.subtype || e.type,
+      location: e.properties?.city || e.properties?.address || undefined,
+      description: e.properties?.description || undefined,
+    }));
+  } catch (err) {
+    console.error('Qloo API query failed:', err);
+    return [];
+  }
+}
+
 export const tools: TCGToolDefinition[] = [
   {
     name: 'searchLocations',
@@ -258,10 +299,20 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
     }
 
     case 'checkCulturalTaste': {
+      const qlooResults = await queryQlooTaste(args.entity, args.targetDomain);
+      if (qlooResults && qlooResults.length > 0) {
+        return {
+          source: 'qloo_taste_ai',
+          queryEntity: args.entity,
+          targetDomain: args.targetDomain || 'places',
+          culturalAffinities: qlooResults,
+        };
+      }
       return {
+        source: 'taste_analysis',
         entity: args.entity,
-        targetDomain: args.targetDomain || 'general',
-        culturalInsight: `Strong underground crossover with niche electronic/afrobeats scenes and minimalist streetwear. Recommend relaxed, atmospheric spots over loud commercial clubs.`,
+        targetDomain: args.targetDomain || 'places',
+        culturalInsight: `Taste profile aligned with high-energy afrobeats, curated street aesthetics, and relaxed late-night social spots.`,
       };
     }
 
