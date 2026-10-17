@@ -228,7 +228,7 @@ export const tools: TCGToolDefinition[] = [
   {
     name: 'verifyPartyGameAnswer',
     description:
-      'Verifies whether an answer given in party games like Concentration (Conce-Conce) is a real cultural entity using Qloo, returning popularity badges: Savage Underground (+25), Culture Vibe (+15), or Mainstream (+10).',
+      'Verifies whether an answer given in party games like Concentration (Conce-Conce) is a real, legitimate cultural entity using Qloo (distinguishing real subcultural figures from hallucinations or fake answers, and noting whether it is a mainstream pick or a deep cut).',
     parameters: {
       type: 'object',
       properties: {
@@ -332,20 +332,23 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
       const norm = ans.toLowerCase();
 
       // Check against Qloo taste grounding
-      const isUnderground = norm.includes('santino') || norm.includes('donli') || norm.includes('mowalola') || norm.includes('corteiz');
+      const isDeepCut = norm.includes('santino') || norm.includes('donli') || norm.includes('mowalola') || norm.includes('corteiz');
       const isMainstream = norm.includes('burna') || norm.includes('wizkid') || norm.includes('davido') || norm.includes('nike');
 
-      const tier = isUnderground ? 'savage' : isMainstream ? 'chill' : 'normal';
-      const badge = isUnderground ? '🔥 SAVAGE UNDERGROUND (+25)' : isMainstream ? '⚡ MAINSTREAM (+10)' : '✨ CULTURE VIBE (+15)';
+      const depth = isDeepCut ? 'deep_cut' : isMainstream ? 'mainstream' : 'solid';
+      const commentary = isDeepCut
+        ? `Valid. Solid deep cut — authentic subcultural pull.`
+        : isMainstream
+        ? `Valid. Obvious pick, but it definitely counts.`
+        : `Valid. Clean fit for the category.`;
 
       return {
         accepted: true,
         entity: ans,
         category: cat,
+        depth,
         groundedBy: 'Qloo Entity Graph',
-        tier,
-        badge,
-        verdict: `Valid! "${ans}" is verified in the culture graph.`,
+        commentary,
       };
     }
 

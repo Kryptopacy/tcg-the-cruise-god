@@ -34,10 +34,7 @@ When squad members drop conflicting vibes (e.g. *"Afrobeats rooftop"* vs. *"quie
 Leaps across disparate cultural domains (Music ➔ Fashion, Cinema ➔ Dining). When a user asks what streetwear aesthetic matches artists like *Burna Boy* or *Asake*, Qloo’s Taste Graph provides high-affinity subcultural pairings (e.g. *Corteiz*, *Mowalola*, *Vivienne Westwood*).
 
 ### 3. Zero-Hallucination Party Game Arbiter (`verifyPartyGameAnswer`)
-When hosting games like *Concentration (Conce-Conce)* directly inside the iMessage thread, TCG checks player answers against Qloo’s 575M+ entity database. Obscure underground answers are validated and rewarded with real-time popularity badges:
-* **🔥 SAVAGE UNDERGROUND (+25 pts)**: High-conviction niche/subcultural entities (e.g. *Cruel Santino*).
-* **✨ CULTURE VIBE (+15 pts)**: Established cultural icons.
-* **⚡ MAINSTREAM (+10 pts)**: Global mainstream entities.
+When hosting party games like *Concentration (Conce-Conce)* directly inside the iMessage thread, TCG uses Qloo’s 575M+ entity database as an objective reality check. It verifies whether an answer is a legitimate real-world cultural figure, artist, or item—weeding out hallucinations and fake names, while recognizing authentic deep cuts versus obvious mainstream answers with natural human banter.
 
 ### 4. Interactive Live Room Creation (`createCruiseRoom`)
 Seamlessly transitions the group from iMessage text into synchronized multiplayer digital arcade games on [CruiseHQ](https://cruisehq.fun).
@@ -89,7 +86,7 @@ npm run test:bot
 **What you will see:**
 1. **Scenario 1**: Marcus, Dave, and Sarah's conflicting vibes are analyzed via `resolveGroupConsensus`, returning an executive "Night Czar" plan.
 2. **Scenario 2**: Kemi asks for Burna Boy & Asake fashion matches; `checkCulturalTaste` returns Qloo cross-domain affinities.
-3. **Scenario 3**: Tobi calls out *Cruel Santino* in Conce-Conce; `verifyPartyGameAnswer` confirms the entity and awards the **🔥 SAVAGE UNDERGROUND (+25)** badge.
+3. **Scenario 3**: Tobi calls out *Cruel Santino* in Conce-Conce; `verifyPartyGameAnswer` confirms the entity as an authentic subcultural deep cut.
 4. **Scenario 4**: Dave asks for a pre-game room; `createCruiseRoom` provisions a live room code on CruiseHQ.
 
 ---
