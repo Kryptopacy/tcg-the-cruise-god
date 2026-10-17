@@ -1,6 +1,16 @@
+import http from 'node:http';
 import { Spectrum } from 'spectrum-ts';
 import { imessage } from '@spectrum-ts/imessage';
 import { TCGEngine } from './agent.ts';
+
+// Lightweight health check server for free cloud hosts (Render, Koyeb, etc.)
+const PORT = process.env.PORT || 3000;
+http.createServer((_req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('🚢 TCG (The Cruise God) is alive and cruising on iMessage!');
+}).listen(PORT, () => {
+  console.log(`🌐 Health check server listening on port ${PORT}`);
+});
 
 const app = await Spectrum({
   projectId: process.env.PROJECT_ID!,
