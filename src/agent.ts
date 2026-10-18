@@ -1,9 +1,24 @@
 import { TCG_SYSTEM_PROMPT } from './prompt.ts';
 import { tools, executeTool } from './tools.ts';
 
+export interface MediaAttachment {
+  mimeType: string;
+  data: string; // base64
+}
+
+export interface ChatPart {
+  text?: string;
+  inlineData?: {
+    mimeType: string;
+    data: string;
+  };
+  functionCall?: any;
+  functionResponse?: any;
+}
+
 export interface ChatMessage {
   role: 'user' | 'model';
-  parts: { text?: string }[];
+  parts: ChatPart[];
 }
 
 export class TCGEngine {
@@ -19,17 +34,34 @@ export class TCGEngine {
     this.model = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
   }
 
-  async processMessage(chatId: string, sender: string, incomingText: string): Promise<string> {
+  async processMessage(
+    chatId: string,
+    sender: string,
+    incomingText: string,
+    media?: MediaAttachment
+  ): Promise<string> {
     let chatHistory = this.history.get(chatId);
     if (!chatHistory) {
       chatHistory = [];
       this.history.set(chatId, chatHistory);
     }
 
+    const parts: ChatPart[] = [];
     const userMessageContent = `[Sender: ${sender}]\n${incomingText}`;
+    parts.push({ text: userMessageContent });
+
+    if (media) {
+      parts.push({
+        inlineData: {
+          mimeType: media.mimeType,
+          data: media.data,
+        },
+      });
+    }
+
     chatHistory.push({
       role: 'user',
-      parts: [{ text: userMessageContent }],
+      parts,
     });
 
     if (chatHistory.length > 20) {
