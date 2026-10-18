@@ -24,18 +24,18 @@ TCG does not act like a generic assistant. It is a charismatic, culturally groun
 | Category | Why TCG Wins |
 | :--- | :--- |
 | ⏱️ **The Most Time-Saving Muse** | Eliminates the brutal 45-minute *"Where are we going? Idk, whatever you want"* loop in 10 seconds. Snaps bills and calculates per-person splits instantly. Slices hours spent DMing flaky DJs and promoters by pulling verified plugs directly from CruiseHQ. |
-| ⚡ **The Most Unhinged Muse** | The "Night Czar" who ruthlessly suspends democracy when friends hesitate. Doesn't ask for a 10th poll—makes the executive call, drops a 5-minute Apple Tapback veto ultimatum, and roasts repeats during live games of Conce-Conce. |
+| ⚡ **The Most Unhinged Muse** | The unapologetic Squad Arbiter who ruthlessly suspends democracy when friends hesitate. Doesn't ask for a 10th poll—makes the executive call, drops a 5-minute Apple Tapback veto ultimatum, and roasts repeats during live games of Conce-Conce. |
 | ✨ **The Most Inspiring Muse** | Uses AI to get people **off their phones and together in real life**. Deep taste graph mapping connects subcultures, music, and fashion to real local spaces, bridging digital chat into live shared memories. |
 
 ---
 
 ## 🚀 Core Superpowers
 
-### 1. 🏛️ The "Night Czar" Consensus Protocol (Group Chat Arbitration)
-In iMessage group chats, democracy fails. When Marcus wants rooftop cocktails and Afrobeats, while Sarah wants a quiet pasta dinner, TCG:
+### 1. 🏛️ The 24/7 Squad Arbiter & Decision Engine (Group Chat Consensus)
+In iMessage group chats, democracy fails. Whether it's picking a morning co-working cafe, deciding between an afternoon beach house or a daytime park picnic, or debating rooftop drinks vs. an underground set at midnight:
 * Detects opposing squad desires across multiple senders (`[Sender: Marcus]`, `[Sender: Sarah]`).
-* Computes their cultural taste overlap via **Qloo’s correlation engine**.
-* Decrees an executive compromise (dinner at Spot A, late-night set at Spot B) and triggers native **Apple Tapback voting** (`Tapback ❤️ to lock in, 👎 to veto in 5 mins`).
+* Computes their cultural taste overlap via **Qloo’s correlation engine** across any city (Lagos, London, Accra, New York, etc.).
+* Decrees an executive compromise (brunch/dinner at Spot A, daytime wave or late set at Spot B) and triggers native **Apple Tapback voting** (`Tapback ❤️ to lock in, 👎 to veto in 5 mins`).
 
 ### 2. 🎙️ Native Multimodal Sensing (Voice Notes & Photos)
 TCG isn't restricted to text:

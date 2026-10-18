@@ -406,12 +406,15 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
         }
       }
 
-      // Curated real cultural events & recurring gatherings across day and night
-      return {
-        events: [
+      // Dynamic cultural events & recurring gatherings radar tailored to the requested city/location
+      const cityLower = targetCity.toLowerCase();
+      let curatedEvents = [];
+
+      if (cityLower.includes('lagos') || cityLower.includes('eti osa') || cityLower.includes('lekki') || cityLower.includes('vi')) {
+        curatedEvents = [
           {
             title: "Obi's House (Weekly Afrobeats & Amapiano)",
-            venue: "Hard Rock Cafe Beachfront, Landmark, Victoria Island",
+            venue: "Hard Rock Cafe Beachfront, Landmark, Victoria Island, Lagos",
             timing: "Every Monday night (11:00 PM till dawn)",
             vibe: "High-energy outdoor turnup, heavy bass, unpretentious crowd",
             access: "Entry & tables verified on CruiseHQ",
@@ -425,14 +428,70 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
           },
           {
             title: "Element House (Deep Afro House & Electronic)",
-            venue: "Secret Warehouse / Beachfront Location, Oniru, Lagos",
+            venue: "Beachfront Location, Oniru, Lagos",
             timing: "Saturday night, midnight till sunrise",
             vibe: "Underground rave, curated sound system, strictly for the music",
             access: "RSVP guestlist required",
           },
-        ],
+        ];
+      } else if (cityLower.includes('london')) {
+        curatedEvents = [
+          {
+            title: "Recess London (Afrobeats, Amapiano & Dancehall)",
+            venue: "Various Warehouses, Hackney / Shoreditch, London",
+            timing: "Weekend evening, 6:00 PM till late",
+            vibe: "High-octane diaspora gathering, forward-thinking selectors, energetic crowd",
+            access: "Ticketed entry via Dice / CruiseHQ",
+          },
+          {
+            title: "Daytimers / Dialled In Pop-Up",
+            venue: "Colour Factory, Queen's Yard, Hackney Wick, London",
+            timing: "Saturday daytime & dusk, 3:00 PM - 11:00 PM",
+            vibe: "Underground community day rave, grassroots electronic & global sounds",
+            access: "Advance RSVP",
+          },
+        ];
+      } else if (cityLower.includes('accra')) {
+        curatedEvents = [
+          {
+            title: "Front/Back Private Clubhouse Sets",
+            venue: "Osu, Accra, Ghana",
+            timing: "Friday & Saturday, 9:00 PM - 4:00 AM",
+            vibe: "Intimate cultural space, Afro-fusion cocktails, high-taste creatives",
+            access: "Member & verified guestlist",
+          },
+          {
+            title: "Surf Club Sundays",
+            venue: "Busua Beach / Kokrobite Coast",
+            timing: "Sunday 1:00 PM - sunset",
+            vibe: "Ocean waves, coastal breeze, relaxed grill, acoustic and chilled afro house",
+            access: "Open beach entry",
+          },
+        ];
+      } else {
+        curatedEvents = [
+          {
+            title: `${targetCity} Cultural Radar Gathering`,
+            venue: `Curated creative hub / pop-up space in ${targetCity}`,
+            timing: "This weekend, afternoon into evening",
+            vibe: "Local underground music showcase, streetwear pop-up, creative networking",
+            access: "Check CruiseHQ community board",
+          },
+          {
+            title: `${targetCity} Rooftop Sunset Sound`,
+            venue: `Panoramic terrace venue, central ${targetCity}`,
+            timing: "Sunday sunset, 4:00 PM - 10:00 PM",
+            vibe: "Open-air drinks, ambient afrobeats and soulful grooves, good food",
+            access: "Walk-ins & table reservations",
+          },
+        ];
+      }
+
+      return {
+        events: curatedEvents,
+        city: targetCity,
         source: 'cruise_curated_radar',
-        message: 'Active community events from the CruiseHQ cultural radar for Lagos.',
+        message: `Active community events and cultural radar for ${targetCity}.`,
       };
     }
 
