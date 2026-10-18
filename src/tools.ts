@@ -52,110 +52,20 @@ async function insertSupabase(table: string, body: Record<string, any>): Promise
   }
 }
 
-/**
- * Curated cultural taste index for fast offline / fallback testing
- */
-const CULTURAL_GROUNDING_MAP: Record<string, Array<{ name: string; type: string; affinity: number; note: string }>> = {
-  'burna boy': [
-    { name: 'Corteiz', type: 'fashion', affinity: 0.94, note: 'High demographic crossover in London & Lagos streetwear' },
-    { name: 'Bottega Veneta', type: 'fashion', affinity: 0.88, note: 'Stage styling luxury affinity' },
-    { name: 'Hard Rock Cafe Lagos', type: 'dining', affinity: 0.85, note: 'Live music & energetic nightlife overlap' },
-  ],
-  'asake': [
-    { name: 'Vivienne Westwood', type: 'fashion', affinity: 0.92, note: 'Neo-punk streetwear aesthetic overlap' },
-    { name: 'Denim Tears', type: 'fashion', affinity: 0.86, note: 'Diaspora heritage and tailored street flair' },
-    { name: 'Zaza Lounge', type: 'dining', affinity: 0.89, note: 'High-energy Afrobeats VIP nightlife' },
-  ],
-  'cruel santino': [
-    { name: 'Mowalola', type: 'fashion', affinity: 0.97, note: 'Core anchor of the Nigerian Alté movement' },
-    { name: 'Stussy', type: 'fashion', affinity: 0.89, note: 'Skate/anime counterculture aesthetic' },
-    { name: 'Bogobiri House', type: 'dining', affinity: 0.91, note: 'Bohemian live music, indie poetry and art lounge' },
-  ],
-  'odumodublvck': [
-    { name: 'Okpu Agu Traditional Caps', type: 'fashion', affinity: 0.95, note: 'Signature cultural drill iconography' },
-    { name: 'Nike Air Force 1', type: 'fashion', affinity: 0.91, note: 'Street drill footwear staple' },
-    { name: 'The Corner Lekki', type: 'dining', affinity: 0.87, note: 'Late-night high-energy hangouts and grills' },
-  ],
-};
-
-/**
- * Query Qloo Taste Graph API (v2) with zero-hallucination fallback
- */
-async function queryQlooTaste(entity: string, targetDomain: string = 'places'): Promise<any[]> {
-  const apiKey = process.env.QLOO_API_KEY;
-
-  if (apiKey) {
-    try {
-      const searchRes = await fetch(`https://hackathon.api.qloo.com/v2/search?query=${encodeURIComponent(entity)}`, {
-        headers: { 'X-Api-Key': apiKey },
-      });
-      if (searchRes.ok) {
-        const searchData = await searchRes.json();
-        const entityId = searchData.results?.[0]?.entity_id;
-        if (entityId) {
-          const domainLower = targetDomain.toLowerCase();
-          const filterType = domainLower.includes('brand') || domainLower.includes('fashion')
-            ? 'urn:entity:brand'
-            : domainLower.includes('movie') || domainLower.includes('film')
-            ? 'urn:entity:movie'
-            : domainLower.includes('music') || domainLower.includes('artist')
-            ? 'urn:entity:artist'
-            : 'urn:entity:place';
-
-          const insightsRes = await fetch(
-            `https://hackathon.api.qloo.com/v2/insights?entity_ids=${entityId}&filter.type=${filterType}`,
-            { headers: { 'X-Api-Key': apiKey } }
-          );
-          if (insightsRes.ok) {
-            const insightsData = await insightsRes.json();
-            const entities = insightsData.results?.entities || [];
-            if (entities.length > 0) {
-              return entities.slice(0, 4).map((e: any) => ({
-                name: e.name,
-                type: e.subtype || e.type,
-                location: e.properties?.city || e.properties?.address || undefined,
-                description: e.properties?.description || undefined,
-                affinityScore: e.score || 0.88,
-              }));
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('[Qloo] Live query error, using cultural taste index fallback:', err);
-    }
-  }
-
-  // Cultural grounding fallback
-  const norm = entity.toLowerCase().trim();
-  for (const [key, val] of Object.entries(CULTURAL_GROUNDING_MAP)) {
-    if (norm.includes(key) || key.includes(norm)) {
-      return val;
-    }
-  }
-
-  return [
-    {
-      name: `${entity} Curated Circle`,
-      type: targetDomain,
-      affinityScore: 0.84,
-      description: `Cross-domain cultural aesthetic with high affinity to ${entity}.`,
-    },
-  ];
-}
+// Clean utility functions for CruiseHQ Supabase directory lookup
 
 export const tools: TCGToolDefinition[] = [
   {
     name: 'resolveGroupConsensus',
     description:
-      'Solves group chat indecision ("Night Czar"): takes differing preferences or vibes mentioned by multiple squad members, queries Qloo Taste Graph to calculate their shared cultural centroid and affinity overlap, and outputs a decisive compromise plan with the cultural rationale.',
+      'Solves group chat indecision: takes differing preferences or vibes mentioned by squad members in a city and constructs an executive compromise route with clear reasoning and Apple Tapback voting.',
     parameters: {
       type: 'object',
       properties: {
         memberVibes: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Array of preferences from different friends in the chat (e.g. ["Dave: Afrobeats and rooftop cocktails", "Sarah: quiet jazz lounge, good pasta", "Marcus: streetwear aesthetic, high energy"])',
+          description: 'Array of preferences from different friends in the chat (e.g. ["Dave: Afrobeats and rooftop cocktails", "Sarah: quiet jazz lounge, good pasta"])',
         },
         city: { type: 'string', description: 'City name (e.g. "Lagos", "London", "New York")' },
       },
@@ -163,28 +73,14 @@ export const tools: TCGToolDefinition[] = [
     },
   },
   {
-    name: 'checkCulturalTaste',
-    description:
-      'Queries Qloo Taste Graph & Cultural AI for verified entity lookups, subcultural affinities, and popularity rankings across music, fashion, nightlife, cinema, and dining.',
-    parameters: {
-      type: 'object',
-      properties: {
-        entity: { type: 'string', description: 'Artist, brand, designer, or cultural icon name' },
-        targetDomain: { type: 'string', description: 'Target domain: "music", "fashion", "film", "dining", "places"' },
-      },
-      required: ['entity'],
-    },
-  },
-  {
     name: 'searchLocations',
     description:
-      'Finds verified venues, restaurants, bars, and lounges from CruiseHQ, optionally ranking them by Qloo cultural taste affinity.',
+      'Finds verified venues, restaurants, bars, and lounges from CruiseHQ directory.',
     parameters: {
       type: 'object',
       properties: {
         query: { type: 'string', description: 'Category, vibe, or name of location (e.g. "cocktail lounge", "rooftop", "suya")' },
         city: { type: 'string', description: 'Target city, e.g. "Lagos", "Ibadan", "London"' },
-        tasteAnchor: { type: 'string', description: 'Optional cultural anchor or artist (e.g. "Burna Boy", "Alte music") to rank venues by taste affinity' },
       },
       required: ['query'],
     },
@@ -226,19 +122,6 @@ export const tools: TCGToolDefinition[] = [
     },
   },
   {
-    name: 'verifyPartyGameAnswer',
-    description:
-      'Verifies whether an answer given in party games like Concentration (Conce-Conce) is a real, legitimate cultural entity using Qloo (distinguishing real subcultural figures from hallucinations or fake answers, and noting whether it is a mainstream pick or a deep cut).',
-    parameters: {
-      type: 'object',
-      properties: {
-        answer: { type: 'string', description: 'The item or entity called out by the player' },
-        category: { type: 'string', description: 'The active game category (e.g. "Nigerian Afrobeats Artists", "Streetwear Brands")' },
-      },
-      required: ['answer', 'category'],
-    },
-  },
-  {
     name: 'createCruiseRoom',
     description: 'Spins up a live interactive multiplayer room on CruiseHQ for the group to join synced arcade games and duels.',
     parameters: {
@@ -271,31 +154,15 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
       const vibes = Array.isArray(args.memberVibes) ? args.memberVibes : [String(args.memberVibes)];
       const city = args.city || 'your city';
 
-      // Query Qloo taste correlations across the mentioned vibes
-      const extractedKeywords = vibes.map(v => v.split(/[:,-]/)[1] || v).join(' ');
-      const qlooAffinities = await queryQlooTaste(extractedKeywords.slice(0, 30), 'places');
-
       return {
-        mode: 'Night Czar Consensus',
+        mode: 'Squad Arbiter Consensus',
         squadVibesAnalyzed: vibes,
         city,
-        tasteEngine: 'Qloo Cultural Graph',
         recommendedConsensus: {
-          vibeFormat: 'Hybrid: Sunset rooftop cocktails with low-lit dining, escalating into late-night DJ vibes',
-          tasteAffinities: qlooAffinities.slice(0, 2),
-          executiveDecision: `Lock in a spot with high craft drinks and a progressive tempo so the food crew eats comfortably while the turnup crew gets their rhythm by 10 PM.`,
+          vibeFormat: 'Hybrid: Sunset terrace drinks with relaxed dining, transitioning into energetic sounds',
+          executiveDecision: `Lock in a spot with high quality food and craft drinks first, then transition the crew to music once dinner wraps.`,
           actionPrompt: 'Drop a Tapback ❤️ to lock this in, or 👎 to veto in the next 5 mins.',
         },
-      };
-    }
-
-    case 'checkCulturalTaste': {
-      const qlooResults = await queryQlooTaste(args.entity, args.targetDomain);
-      return {
-        source: 'qloo_taste_graph',
-        queryEntity: args.entity,
-        targetDomain: args.targetDomain || 'places',
-        culturalAffinities: qlooResults,
       };
     }
 
@@ -306,49 +173,16 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
 
       const data = await querySupabase('cruisehq_venues', queryParams);
 
-      let tasteOverlay: any[] = [];
-      if (args.tasteAnchor) {
-        tasteOverlay = await queryQlooTaste(args.tasteAnchor, 'places');
-      }
-
       if (data && data.length > 0) {
         return {
           verifiedOnCruiseHQ: true,
           venues: data,
-          tasteGroundedByQloo: tasteOverlay.length > 0 ? tasteOverlay : undefined,
         };
       }
 
       return {
         verifiedOnCruiseHQ: false,
-        suggestedByTasteGraph: tasteOverlay.length > 0 ? tasteOverlay : undefined,
-        message: `No local CruiseHQ venues currently listed for that exact query in ${args.city || 'your area'}. Recommending places based on Qloo taste affinities.`,
-      };
-    }
-
-    case 'verifyPartyGameAnswer': {
-      const ans = String(args.answer || '').trim();
-      const cat = String(args.category || '').toLowerCase();
-      const norm = ans.toLowerCase();
-
-      // Check against Qloo taste grounding
-      const isDeepCut = norm.includes('santino') || norm.includes('donli') || norm.includes('mowalola') || norm.includes('corteiz');
-      const isMainstream = norm.includes('burna') || norm.includes('wizkid') || norm.includes('davido') || norm.includes('nike');
-
-      const depth = isDeepCut ? 'deep_cut' : isMainstream ? 'mainstream' : 'solid';
-      const commentary = isDeepCut
-        ? `Valid. Solid deep cut — authentic subcultural pull.`
-        : isMainstream
-        ? `Valid. Obvious pick, but it definitely counts.`
-        : `Valid. Clean fit for the category.`;
-
-      return {
-        accepted: true,
-        entity: ans,
-        category: cat,
-        depth,
-        groundedBy: 'Qloo Entity Graph',
-        commentary,
+        message: `No local CruiseHQ venues currently listed for that exact query in ${args.city || 'your area'}.`,
       };
     }
 

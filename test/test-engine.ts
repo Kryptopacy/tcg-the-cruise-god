@@ -3,35 +3,35 @@ import { TCGEngine } from '../src/agent.ts';
 async function runTests() {
   console.log('===============================================================');
   console.log('🚢 TCG (The Cruise God) Engine Smoke Test Suite');
-  console.log('   Powered by: Qloo Taste Graph API + Google Gemini + Spectrum');
+  console.log('   Powered by: Google Gemini + CruiseHQ + Spectrum');
   console.log('===============================================================\n');
 
   const tcg = new TCGEngine();
 
   const scenarios = [
     {
-      name: 'Scenario 1: Group Chat Indecision Loop ("Night Czar" via Qloo)',
+      name: 'Scenario 1: Group Chat Indecision Loop (Squad Arbiter Consensus)',
       sender: 'Marcus',
       chatId: 'squad-group-chat-01',
       input: 'Yo TCG, the group chat is stuck arguing. Dave wants Afrobeats and rooftop cocktails, Sarah wants a low-key dinner with pasta and quiet vibes, and I just want good music. Where should we go tonight in Lagos?',
     },
     {
-      name: 'Scenario 2: Cross-Domain Cultural Taste Intelligence (Qloo Insights)',
-      sender: 'Kemi',
+      name: 'Scenario 2: Verified CruiseHQ Creative Plug Lookup',
+      sender: 'Marcus',
       chatId: 'squad-group-chat-01',
-      input: 'TCG, what fashion brands or street aesthetic match people who listen to Burna Boy and Asake?',
+      input: 'We need a mobile mixologist for our pre-drinks in Lagos tonight.',
     },
     {
-      name: 'Scenario 3: Zero-Hallucination Party Game Arbiter (Conce-Conce in iMessage)',
-      sender: 'Tobi',
+      name: 'Scenario 3: Interactive Multiplayer Room Creation (CruiseHQ Sync)',
+      sender: 'Sarah',
       chatId: 'squad-group-chat-01',
-      input: 'Let\'s run Conce-Conce! The category is Nigerian Afrobeats Artists. My answer is Cruel Santino. Is that valid?',
+      input: 'Spin up an arcade room for the squad right now.',
     },
     {
-      name: 'Scenario 4: Interactive Multiplayer Room Creation (CruiseHQ Sync)',
-      sender: 'Dave',
+      name: 'Scenario 4: Instant Group Bill Split',
+      sender: 'Marcus',
       chatId: 'squad-group-chat-01',
-      input: 'Spin up a live CruiseHQ room for our squad pre-game so we can play digital arcade games together.',
+      input: 'Split a 65,000 naira suya bill between 4 of us with 10% tip.',
     },
   ];
 
