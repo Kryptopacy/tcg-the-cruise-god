@@ -1,67 +1,87 @@
 # 🚢 TCG (The Cruise God) — Autonomous Social Concierge & Host on iMessage
 
-> **Category (c) Submission for the Qloo Agentic Hackathon**: Integrating the Qloo API & Taste Graph into an autonomous agent on Apple iMessage.
+> **Built for Photon's "Make Your Own Muse" Hackathon & Powered by Qloo's Taste AI™ API**  
+> *A charismatic, culturally tapped-in autonomous social agent living natively in Apple iMessage group chats.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Powered by Qloo](https://img.shields.io/badge/Cultural%20AI-Qloo%20Taste%20Graph-blueviolet)](https://qloo.com)
-[![Photon Spectrum](https://img.shields.io/badge/Platform-iMessage%20via%20Spectrum-black)](https://photon.codes)
-[![Gemini](https://img.shields.io/badge/Model-Gemini%20Flash-blue)](https://deepmind.google/technologies/gemini/)
-
-TCG (**The Cruise God**) is an autonomous social concierge and host living natively inside Apple iMessage (1-on-1 and group chats). Powered by **Qloo’s Taste Graph API**, **Google Gemini**, and **Photon Spectrum**, TCG solves the two most persistent human headaches in social planning: **group chat indecision loops** and **cultural hallucination in AI**.
-
----
-
-## 💡 The Problem: "Democracy Fails in Nightlife"
-
-1. **The 45-Minute Group Chat Deadlock**:  
-   Every weekend, friend groups across iMessage get trapped in the exact same paralysis:  
-   > *"Where should we go tonight?"* ➔ *"Idk, whatever you guys want"* ➔ *(3 hours pass, nobody leaves the house).*  
-   Research across nightlife forums confirms that **democracy fails in group planning**. Groups don't need another generic poll; they need an objective **"Night Czar"** that computes their collective cultural centroid and makes an executive recommendation.
-
-2. **The LLM Cultural Drift & Hallucination Trap**:  
-   When standard LLMs suggest venues or host party games, they either hallucinate fake spots, recommend tourist traps, or recite the same 3 ubiquitous artists. They lack real-world cultural entity ground truth.
+[![Platform: Photon Spectrum](https://img.shields.io/badge/Platform-Photon%20Spectrum%20(iMessage)-black)](https://photon.codes)
+[![Cultural AI: Qloo Taste Graph](https://img.shields.io/badge/Cultural%20AI-Qloo%20Taste%20Graph-blueviolet)](https://qloo.com)
+[![Model: Gemini 3.5 Flash](https://img.shields.io/badge/Model-Gemini%203.5%20Flash-blue)](https://deepmind.google/technologies/gemini/)
+[![CruiseHQ: Verified Directory](https://img.shields.io/badge/Social%20Layer-CruiseHQ.fun-orange)](https://cruisehq.fun)
 
 ---
 
-## ⚡ How Qloo Powers TCG
+## 🌟 Overview
 
-TCG uses **Qloo's Taste Graph** as its core mathematical arbiter:
+**TCG (The Cruise God)** is an autonomous social concierge, cultural taste-maker, and game host living natively inside Apple iMessage (1-on-1 and multi-party squad group chats). Built on **Photon Spectrum**, **Google Gemini**, and **Qloo’s Taste Graph API**, TCG solves the most universal headache in group coordination: **group chat indecision loops, cultural disconnects, and friction in bringing friends together in the real world.**
 
-### 1. The "Night Czar" Consensus Protocol (`resolveGroupConsensus`)
-When squad members drop conflicting vibes (e.g. *"Afrobeats rooftop"* vs. *"quiet pasta dinner"*), TCG queries Qloo’s correlation engine across those vectors, identifies the mathematical taste overlap, and outputs a decisive compromise plan with native Apple Tapback voting (`Tapback ❤️ to lock in, 👎 to veto in 5 mins`).
-
-### 2. Cross-Domain Cultural Affinities (`checkCulturalTaste`)
-Leaps across disparate cultural domains (Music ➔ Fashion, Cinema ➔ Dining). When a user asks what streetwear aesthetic matches artists like *Burna Boy* or *Asake*, Qloo’s Taste Graph provides high-affinity subcultural pairings (e.g. *Corteiz*, *Mowalola*, *Vivienne Westwood*).
-
-### 3. Zero-Hallucination Party Game Arbiter (`verifyPartyGameAnswer`)
-When hosting party games like *Concentration (Conce-Conce)* directly inside the iMessage thread, TCG uses Qloo’s 575M+ entity database as an objective reality check. It verifies whether an answer is a legitimate real-world cultural figure, artist, or item—weeding out hallucinations and fake names, while recognizing authentic deep cuts versus obvious mainstream answers with natural human banter.
-
-### 4. Interactive Live Room Creation (`createCruiseRoom`)
-Seamlessly transitions the group from iMessage text into synchronized multiplayer digital arcade games on [CruiseHQ](https://cruisehq.fun).
+TCG does not act like a generic assistant. It is a charismatic, culturally grounded crew member that listens to squad **voice notes**, reads **restaurant receipt photos**, resolves **40-minute group chat arguments** with executive consensus plans, books real **verified creative plugs**, referees in-chat party games (**Conce-Conce**), and spins up synced web arcade rooms on [CruiseHQ](https://cruisehq.fun).
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## 🎯 Competing for Photon's "Make Your Own Muse" Categories
+
+| Category | Why TCG Wins |
+| :--- | :--- |
+| ⏱️ **The Most Time-Saving Muse** | Eliminates the brutal 45-minute *"Where are we going? Idk, whatever you want"* loop in 10 seconds. Snaps bills and calculates per-person splits instantly. Slices hours spent DMing flaky DJs and promoters by pulling verified plugs directly from CruiseHQ. |
+| ⚡ **The Most Unhinged Muse** | The "Night Czar" who ruthlessly suspends democracy when friends hesitate. Doesn't ask for a 10th poll—makes the executive call, drops a 5-minute Apple Tapback veto ultimatum, and roasts repeats during live games of Conce-Conce. |
+| ✨ **The Most Inspiring Muse** | Uses AI to get people **off their phones and together in real life**. Deep taste graph mapping connects subcultures, music, and fashion to real local spaces, bridging digital chat into live shared memories. |
+
+---
+
+## 🚀 Core Superpowers
+
+### 1. 🏛️ The "Night Czar" Consensus Protocol (Group Chat Arbitration)
+In iMessage group chats, democracy fails. When Marcus wants rooftop cocktails and Afrobeats, while Sarah wants a quiet pasta dinner, TCG:
+* Detects opposing squad desires across multiple senders (`[Sender: Marcus]`, `[Sender: Sarah]`).
+* Computes their cultural taste overlap via **Qloo’s correlation engine**.
+* Decrees an executive compromise (dinner at Spot A, late-night set at Spot B) and triggers native **Apple Tapback voting** (`Tapback ❤️ to lock in, 👎 to veto in 5 mins`).
+
+### 2. 🎙️ Native Multimodal Sensing (Voice Notes & Photos)
+TCG isn't restricted to text:
+* **Voice Notes:** Squad members can hold the mic in iMessage and speak naturally. Spectrum streams the audio bytes, and Gemini 3.5 ingests the voice note directly, parsing accents, energy, and intent.
+* **Receipts & Menus:** Drop a photo of a bar tab, dinner receipt, or event flyer into the chat. TCG reads line items, spots service charges, and executes `splitCheck` on demand.
+* **Outfit Checks & Flyers:** Analyzes party outfits and venue flyers against current street culture.
+
+### 3. 🎯 Zero-Hallucination Verified Plugs & Venues (CruiseHQ Directory)
+Unlike standard LLMs that invent fake street addresses or recommend generic tourist traps:
+* TCG queries **CruiseHQ's live Supabase directory** of **43 real, verified creative plugs** (underground DJs, mobile mixologists, custom streetwear designers, photographers, videographers, barbers).
+* Honest Fallback Doctrine: If no verified venues or events match in the local database, TCG states it honestly rather than hallucinating.
+
+### 4. 🧬 Qloo Cultural Taste Graph Intelligence
+Cross-domain subcultural matching powered by the official **Qloo Taste AI™ API**:
+* Connects music preferences to fashion, dining, and nightlife (e.g. mapping fans of *Burna Boy* and *Asake* to authentic streetwear aesthetics like *Wekafore*, *Orange Culture*, and high-low vintage tailoring).
+* Grounds recommendations in real entity graph intelligence rather than generic LLM stereotypes.
+
+### 5. 🕹️ Game Master & Synced Multiplayer Web Rooms
+* **In-Chat Party Games (Conce-Conce / Concentration):** Leads fast-paced rhythm clapping games in the group chat, tracking turns across friends and validating answers in real time against Qloo's 575M+ entity database.
+* **CruiseHQ Synchronized Rooms (`createCruiseRoom`):** Seamlessly transitions the squad from iMessage text into live web arcade duels at `https://cruisehq.fun/room/{CODE}`, where everyone joins from their mobile screens with synchronized state.
+
+### 6. 💸 Logistics & Bill Splitting
+Native math engine calculates per-person breakdown with customizable tip percentages and tax division.
+
+---
+
+## 🏗️ Architecture
 
 ```mermaid
 flowchart TD
-    User["Apple iMessage User / Squad Group Chat"] <--> Spectrum["Photon Spectrum SDK (@spectrum-ts/imessage)"]
-    Spectrum <--> TCG["TCG Agent Engine (Gemini Function Calling)"]
-    TCG <--> Qloo["Qloo Taste Graph API (v2 /search & /insights)"]
-    TCG <--> CruiseHQ["CruiseHQ DB (Verified Venues, Plugs & Rooms)"]
-    TCG <--> Firecrawl["Firecrawl Live Web Event Search"]
+    User["Apple iMessage Group Chat (Text, Voice Notes, Photos)"] <--> Spectrum["Photon Spectrum SDK (@spectrum-ts/imessage)"]
+    Spectrum <--> TCG["TCG Muse Engine (Gemini 3.5 Flash Multimodal)"]
+    TCG <--> Qloo["Qloo Taste AI API (v2 /search & /insights)"]
+    TCG <--> CruiseHQ["CruiseHQ DB (43 Verified Plugs, Venues, Rooms)"]
+    TCG <--> Rooms["Live Web Arcade (https://cruisehq.fun/room/CODE)"]
 ```
 
-* **Agent Runtime**: [Photon Spectrum](https://photon.codes) (`spectrum-ts` + `@spectrum-ts/imessage`).
-* **Cultural Intelligence**: [Qloo Taste Graph API](https://qloo.com) (`/v2/search`, `/v2/insights`, `/v2/correlations`).
-* **LLM Engine**: Google Gemini Flash via REST function declarations.
-* **Database & Social Layer**: Supabase PostgreSQL ([CruiseHQ ecosystem](https://cruisehq.fun)).
+* **Runtime**: [Photon Spectrum](https://photon.codes) (`spectrum-ts` + `@spectrum-ts/imessage`) with auto-reconnect resilience.
+* **LLM Engine**: Google Gemini 3.5 Flash (native multimodal audio & image processing).
+* **Taste AI**: Qloo Taste Graph API (`https://hackathon.api.qloo.com`).
+* **Database & Social Layer**: CruiseHQ Supabase PostgREST.
+* **Cloud Ready**: Built-in HTTP health check server for 100% free deployment on Render, Koyeb, or Docker.
 
 ---
 
-## 🚀 10-Second Testing Guide for Judges
-
-You do **not** need a macOS device or an active iMessage account to test and evaluate TCG's full agentic workflow. We have packaged a complete, deterministic smoke test suite that runs the live agent loop across all 4 core scenarios:
+## ⚡ Quickstart & Testing
 
 ### 1. Clone & Install
 ```bash
@@ -71,39 +91,36 @@ npm install
 ```
 
 ### 2. Configure Environment
-Copy `.env.example` to `.env` and add your keys:
+Copy `.env.example` to `.env` with your keys:
 ```env
-GEMINI_API_KEY=your_gemini_key
-QLOO_API_KEY=your_qloo_hackathon_key
+PROJECT_ID=your_photon_project_id
+PROJECT_SECRET=your_photon_project_secret
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-3.5-flash-lite
+QLOO_API_KEY=your_qloo_api_key
+SUPABASE_URL=https://vwxhxygaijvdthahjwec.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_key
 ```
-*(Note: If testing without a live Qloo key, TCG automatically engages its grounded cultural taste index fallback).*
 
 ### 3. Run the Automated Smoke Suite
 ```bash
 npm run test:bot
 ```
+Executes automated group chat simulations proving:
+1. **Group Chat Arbitration ("Night Czar")** via Qloo correlation.
+2. **Cross-Domain Taste Mapping** via Qloo `/v2/insights`.
+3. **Conce-Conce Entity Verification** via Qloo entity validation.
+4. **Live CruiseHQ Multiplayer Room Creation** with instant join URL.
 
-**What you will see:**
-1. **Scenario 1**: Marcus, Dave, and Sarah's conflicting vibes are analyzed via `resolveGroupConsensus`, returning an executive "Night Czar" plan.
-2. **Scenario 2**: Kemi asks for Burna Boy & Asake fashion matches; `checkCulturalTaste` returns Qloo cross-domain affinities.
-3. **Scenario 3**: Tobi calls out *Cruel Santino* in Conce-Conce; `verifyPartyGameAnswer` confirms the entity as an authentic subcultural deep cut.
-4. **Scenario 4**: Dave asks for a pre-game room; `createCruiseRoom` provisions a live room code on CruiseHQ.
-
----
-
-## 📱 Running Live on iMessage
-
-To deploy TCG into a live iMessage group chat:
-1. Create a project on [Photon](https://app.photon.codes) with the iMessage provider.
-2. Add `PROJECT_ID` and `PROJECT_SECRET` to `.env`.
-3. Start the daemon:
+### 4. Start Live iMessage Daemon
 ```bash
 npm start
 ```
-Add TCG's iMessage handle to any 1-on-1 or group chat thread.
+Starts TCG listening continuously on iMessage with auto-reconnect and health-check monitoring on port `3000`.
 
 ---
 
-## 📄 License
+## 👥 Authors & Attribution
 
-This project is open-source and available under the [MIT License](LICENSE).
+Built with passion for the **Photon "Make Your Own Muse" Hackathon** & **Qloo Agentic Hackathon**.  
+Powered by [Photon](https://photon.codes), [Qloo](https://qloo.com), [Google Gemini](https://deepmind.google/technologies/gemini/), and [CruiseHQ](https://cruisehq.fun).
