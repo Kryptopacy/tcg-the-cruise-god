@@ -140,12 +140,14 @@ export class TCGEngine {
 
         const followUpData = await followUpRes.json();
         const finalCandidate = followUpData.candidates?.[0];
-        const finalReply = finalCandidate?.content?.parts?.[0]?.text || "Locked in. That's the move.";
+        let finalReply = finalCandidate?.content?.parts?.[0]?.text || "Locked in. That's the move.";
+        finalReply = finalReply.replace(/^\[Sender:\s*[^\]]+\]\s*/i, '').trim();
         chatHistory.push({ role: 'model', parts: [{ text: finalReply }] });
         return finalReply;
       }
 
-      const textReply = parts[0]?.text || "Talk to me. What's the plan?";
+      let textReply = parts[0]?.text || "Talk to me. What's the plan?";
+      textReply = textReply.replace(/^\[Sender:\s*[^\]]+\]\s*/i, '').trim();
       chatHistory.push({ role: 'model', parts: [{ text: textReply }] });
       return textReply;
     } catch (err: any) {
