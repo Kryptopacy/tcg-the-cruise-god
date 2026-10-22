@@ -31,13 +31,14 @@ export class TCGEngine {
   private history: Map<string, ChatMessage[]> = new Map();
   private apiKey: string;
   private model: string;
+  private fallbackModel: string = 'gemini-flash-lite-latest';
 
   constructor() {
     this.apiKey = process.env.GEMINI_API_KEY || '';
     if (!this.apiKey) {
       throw new Error('GEMINI_API_KEY environment variable is missing.');
     }
-    this.model = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+    this.model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
   }
 
   private cleanReply(text: string): string {
@@ -60,9 +61,16 @@ export class TCGEngine {
         const data = await res.json();
         if (res.ok) return data;
 
-        // If 503 or 429, wait briefly and retry
-        if ((res.status === 503 || res.status === 429) && attempt < maxRetries) {
-          console.warn(`Gemini API returned ${res.status}, retrying in ${(attempt + 1) * 1500}ms...`);
+        // If 429 quota exhaustion on primary model, immediately pivot to high-quota fallback model
+        if (res.status === 429 && endpoint.includes(this.model) && this.model !== this.fallbackModel) {
+          console.warn(`⚠️ [TCG Engine] ${this.model} free-tier daily cap reached. Transparently routing to ${this.fallbackModel}...`);
+          const fallbackEndpoint = endpoint.replace(this.model, this.fallbackModel);
+          return await this.callGeminiWithRetry(fallbackEndpoint, payload, maxRetries);
+        }
+
+        // If 503 temporary demand spike, wait briefly and retry
+        if (res.status === 503 && attempt < maxRetries) {
+          console.warn(`Gemini API returned 503, retrying in ${(attempt + 1) * 1500}ms...`);
           await new Promise((r) => setTimeout(r, (attempt + 1) * 1500));
           continue;
         }
