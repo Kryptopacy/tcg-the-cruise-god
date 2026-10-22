@@ -293,6 +293,61 @@ export const tools: TCGToolDefinition[] = [
       required: [],
     },
   },
+  {
+    name: 'rollDice',
+    description: 'Rolls one or more dice for party/drinking games or disputes.',
+    parameters: {
+      type: 'object',
+      properties: {
+        diceCount: { type: 'number', description: 'Number of dice (default 2)' },
+        sides: { type: 'number', description: 'Sides per die, e.g. 6, 20 (default 6)' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'spinTheBottle',
+    description: 'Spins a bottle among squad members in the chat for truth/dare, shots, or challenges.',
+    parameters: {
+      type: 'object',
+      properties: {
+        players: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Names of players present in the session (e.g. ["Marcus", "Sarah", "Dave", "Kemi"])',
+        },
+      },
+      required: ['players'],
+    },
+  },
+  {
+    name: 'getTruthOrDare',
+    description: 'Generates an authentic, hilarious party Truth or Dare challenge from CruiseHQ party tools.',
+    parameters: {
+      type: 'object',
+      properties: {
+        type: { type: 'string', description: '"truth" or "dare" or "random"' },
+        intensity: { type: 'string', description: '"chill", "party", "spicy", "chaotic"' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'randomizeTeams',
+    description: 'Splits squad members into fair, balanced teams with hilarious team names for beer pong, FIFA, or party games.',
+    parameters: {
+      type: 'object',
+      properties: {
+        players: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'List of player names to split',
+        },
+        teamCount: { type: 'number', description: 'Number of teams (default 2)' },
+      },
+      required: ['players'],
+    },
+  },
 ];
 
 export async function executeTool(name: string, args: Record<string, any>): Promise<any> {
@@ -790,6 +845,98 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
         result: outcome,
         reason: args.reason || 'Decision',
         message: `Coin landed on: ${outcome.toUpperCase()}!`,
+      };
+    }
+
+    case 'rollDice': {
+      const count = Math.min(6, Math.max(1, Number(args.diceCount) || 2));
+      const sides = Math.max(2, Number(args.sides) || 6);
+      const rolls = Array.from({ length: count }, () => Math.floor(Math.random() * sides) + 1);
+      const sum = rolls.reduce((a, b) => a + b, 0);
+
+      return {
+        rolls,
+        total: sum,
+        diceSides: sides,
+        message: `Rolled ${count}d${sides}: [${rolls.join(', ')}] = Total ${sum}`,
+      };
+    }
+
+    case 'spinTheBottle': {
+      const players = Array.isArray(args.players) ? args.players : ['Marcus', 'Sarah', 'Dave'];
+      const chosen = players[Math.floor(Math.random() * players.length)];
+
+      return {
+        action: 'Spin The Bottle',
+        bottleLandedOn: chosen,
+        allPlayers: players,
+        instruction: `The bottle spun and pointed straight at ${chosen}! Step up to the hot seat.`,
+      };
+    }
+
+    case 'getTruthOrDare': {
+      const type = (args.type || (Math.random() < 0.5 ? 'truth' : 'dare')).toLowerCase();
+      const intensity = args.intensity || 'party';
+
+      const truths = [
+        "What is the most unhinged lie you told to escape a party or date?",
+        "Who in this group chat would survive the shortest amount of time in a horror movie and why?",
+        "Show the last DM you sent on Instagram right now without context.",
+        "What is the most expensive purchase you made while completely tipsy?",
+        "Have you ever ghosted someone and then ran into them in public?",
+      ];
+
+      const dares = [
+        "Voice note the squad right now singing the chorus of your favorite throwback track.",
+        "Take a selfie with the weirdest object within arm's reach and send it into the chat in 15 seconds.",
+        "Text your most recent contact 'We need to talk about what happened' and screenshot the reply.",
+        "Let the squad pick your profile picture for the next 24 hours.",
+        "Give your most brutal 10-second vocal impersonation of someone in this chat.",
+      ];
+
+      const prompt = type.includes('truth')
+        ? truths[Math.floor(Math.random() * truths.length)]
+        : dares[Math.floor(Math.random() * dares.length)];
+
+      return {
+        type: type.includes('truth') ? 'TRUTH' : 'DARE',
+        intensity,
+        challenge: prompt,
+        penalty: "Refusal = 10 pushups or taking a double shot on camera.",
+      };
+    }
+
+    case 'randomizeTeams': {
+      const players = [...(Array.isArray(args.players) ? args.players : ['Player 1', 'Player 2'])];
+      const teamCount = Math.max(2, Number(args.teamCount) || 2);
+
+      // Fisher-Yates shuffle
+      for (let i = players.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [players[i], players[j]] = [players[j], players[i]];
+      }
+
+      const teamNames = [
+        'Team Henny 🔥',
+        'Team Casamigos ⚡',
+        'Mainland Rebels 👑',
+        'Island VIPs 🍾',
+        'Chaos Crew 😈',
+      ];
+
+      const teams: Record<string, string[]> = {};
+      for (let i = 0; i < teamCount; i++) {
+        teams[teamNames[i % teamNames.length]] = [];
+      }
+
+      players.forEach((p, index) => {
+        const teamKey = teamNames[index % teamCount];
+        teams[teamKey].push(p);
+      });
+
+      return {
+        squadSplit: teams,
+        message: 'Teams locked in. No trading players without paying a squad fine!',
       };
     }
 

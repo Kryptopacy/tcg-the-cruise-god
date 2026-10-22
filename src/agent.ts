@@ -187,7 +187,43 @@ export class TCGEngine {
       const followUpData = await this.callGeminiWithRetry(endpoint, followUpPayload);
       if (followUpData) {
         const finalCandidate = followUpData.candidates?.[0];
-        let finalReply = finalCandidate?.content?.parts?.[0]?.text || "Locked in. That's the move.";
+        const finalParts = finalCandidate?.content?.parts || [];
+
+        // Check if model chained a second tool call (e.g. spinTheBottle -> getTruthOrDare)
+        const secondToolCall = finalParts.find((p: any) => p.functionCall);
+        if (secondToolCall && secondToolCall.functionCall) {
+          const secondName = secondToolCall.functionCall.name;
+          const secondArgs = secondToolCall.functionCall.args || {};
+          console.log(`⚡ [TCG CHAINED TOOL]: ${secondName}`, secondArgs);
+          const secondResult = await executeTool(secondName, secondArgs);
+
+          const chainedPayload = {
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: [
+              ...followUpPayload.contents,
+              { role: 'model', parts: finalCandidate.content.parts },
+              {
+                role: 'user',
+                parts: [{ functionResponse: { name: secondName, response: { result: secondResult } } }],
+              },
+            ],
+          };
+
+          const chainedData = await this.callGeminiWithRetry(endpoint, chainedPayload);
+          if (chainedData) {
+            const chainedCandidate = chainedData.candidates?.[0];
+            const chainedTextPart = chainedCandidate?.content?.parts?.find((p: any) => p.text && !p.thought)
+              || chainedCandidate?.content?.parts?.find((p: any) => p.text);
+            let chainedReply = chainedTextPart?.text || "Locked in. That's the move.";
+            chainedReply = this.cleanReply(chainedReply);
+            chatHistory.push(pendingUserMessage);
+            chatHistory.push({ role: 'model', parts: [{ text: chainedReply }] });
+            return chainedReply;
+          }
+        }
+
+        const textPart = finalParts.find((p: any) => p.text && !p.thought) || finalParts.find((p: any) => p.text);
+        let finalReply = textPart?.text || "Locked in. That's the move.";
         finalReply = this.cleanReply(finalReply);
 
         // Commit successful exchange to history
