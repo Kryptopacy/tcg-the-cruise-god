@@ -29,7 +29,8 @@ async function startBot() {
       console.log('🚢 TCG (The Cruise God) is live on iMessage via Spectrum!');
 
       for await (const [space, message] of app.messages) {
-        const sender = (message as any).sender?.address || 'Cruiser';
+        const senderObj = (message as any).sender;
+        const sender = senderObj?.name || senderObj?.displayName || senderObj?.address || 'Cruiser';
         const chatId = space.id;
         let text = '';
         let media: { mimeType: string; data: string } | undefined;

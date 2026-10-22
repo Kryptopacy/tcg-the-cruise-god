@@ -29,6 +29,7 @@ export interface ChatMessage {
 
 export class TCGEngine {
   private history: Map<string, ChatMessage[]> = new Map();
+  private participants: Map<string, Set<string>> = new Map();
   private apiKey: string;
   private model: string;
   private fallbackModel: string = 'gemini-flash-lite-latest';
@@ -101,9 +102,19 @@ export class TCGEngine {
       this.history.set(chatId, chatHistory);
     }
 
-    const isGroup = chatId.includes('-group-') || chatId.startsWith('group:') || sender !== 'Direct';
+    let chatParticipants = this.participants.get(chatId);
+    if (!chatParticipants) {
+      chatParticipants = new Set<string>();
+      this.participants.set(chatId, chatParticipants);
+    }
+    if (sender && sender !== 'Cruiser' && sender !== 'Direct') {
+      chatParticipants.add(sender);
+    }
+
+    const isGroup = chatId.includes('-group-') || chatId.startsWith('group:') || sender !== 'Direct' || chatParticipants.size > 1;
     const systemPrompt = buildSystemPrompt({
       chatType: isGroup ? 'group' : 'direct',
+      activeParticipants: Array.from(chatParticipants),
     });
 
     const userParts: ChatPart[] = [];
