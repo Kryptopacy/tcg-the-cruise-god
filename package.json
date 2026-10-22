@@ -5,7 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env --experimental-strip-types src/index.ts",
+    "start": "node --experimental-strip-types src/index.ts",
+    "start:local": "node --env-file=.env --experimental-strip-types src/index.ts",
     "dev": "node --watch --env-file=.env --experimental-strip-types src/index.ts",
     "test:bot": "node --env-file=.env --experimental-strip-types test/test-engine.ts"
   },
