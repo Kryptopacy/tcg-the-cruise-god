@@ -94,7 +94,7 @@ export const tools: TCGToolDefinition[] = [
   {
     name: 'resolveGroupConsensus',
     description:
-      'Solves group chat indecision loops: takes differing preferences or vibes mentioned by squad members in a city and constructs an executive compromise route with clear reasoning and Apple Tapback voting.',
+      'Solves group chat indecision loops: takes differing preferences or vibes mentioned by squad members in a city and constructs an executive compromise route or picks a single winner when budget/time permits only one.',
     parameters: {
       type: 'object',
       properties: {
@@ -104,6 +104,8 @@ export const tools: TCGToolDefinition[] = [
           description: 'Array of preferences from friends in the chat (e.g. ["Dave: Afrobeats and rooftop cocktails", "Sarah: quiet pasta and wine"])',
         },
         city: { type: 'string', description: 'City name (e.g. "Lagos", "London", "Abuja", "New York")' },
+        budgetConstraint: { type: 'string', description: 'Budget limit or constraint, e.g. "tight budget", "₦30k total", "only enough cash for one"' },
+        mustPickSingleWinner: { type: 'boolean', description: 'True if squad explicitly asked for only ONE spot or cannot afford both' },
       },
       required: ['memberVibes'],
     },
@@ -300,6 +302,22 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
     case 'resolveGroupConsensus': {
       const vibes = Array.isArray(args.memberVibes) ? args.memberVibes : [String(args.memberVibes)];
       const city = args.city || 'your city';
+      const budget = args.budgetConstraint;
+      const pickSingle = !!args.mustPickSingleWinner || !!budget;
+
+      if (pickSingle) {
+        return {
+          mode: 'Squad Arbiter — Single Winner Selection',
+          squadVibesAnalyzed: vibes,
+          city,
+          budgetConstraint: budget || 'Limited to ONE move',
+          executiveRule: {
+            verdictType: 'Single Winner (Cruise Efficiency)',
+            instruction: 'Evaluate which option gives maximum collective memory, energy, and food/vibe per dollar without putting friends into debt. Pick ONE clear winner, playfully roast the losing idea, and promise the loser priority for next weekend.',
+            tiebreakerFallback: 'If equally viable, call flipCoin or run a 60-second Tapback showdown.',
+          },
+        };
+      }
 
       return {
         mode: 'Squad Arbiter Consensus',
