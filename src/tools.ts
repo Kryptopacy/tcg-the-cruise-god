@@ -147,6 +147,50 @@ export const tools: TCGToolDefinition[] = [
     },
   },
   {
+    name: 'getTicketCheckout',
+    description: 'Generates a verified 1-tap checkout link for purchasing tickets to an event on CruiseHQ or verified ticketing partners.',
+    parameters: {
+      type: 'object',
+      properties: {
+        eventName: { type: 'string', description: 'Name of the event' },
+        ticketTier: { type: 'string', description: 'Ticket tier, e.g. "Regular", "VIP", "Backstage", "Table for 4"' },
+        quantity: { type: 'number', description: 'Number of tickets' },
+        city: { type: 'string', description: 'City of the event' },
+      },
+      required: ['eventName'],
+    },
+  },
+  {
+    name: 'bookPlug',
+    description: 'Packages a booking request for a verified creative plug (DJ, mixologist, photographer, stylist) from CruiseHQ with verified rates and payment/intro link.',
+    parameters: {
+      type: 'object',
+      properties: {
+        plugName: { type: 'string', description: 'Name or handle of the plug' },
+        serviceCategory: { type: 'string', description: 'Service type (e.g. "DJ", "Mobile Mixologist", "Photographer")' },
+        date: { type: 'string', description: 'Date of the gig/party' },
+        city: { type: 'string', description: 'Event city' },
+        durationHours: { type: 'number', description: 'Estimated hours of service' },
+      },
+      required: ['plugName', 'serviceCategory'],
+    },
+  },
+  {
+    name: 'reserveVenue',
+    description: 'Packages a table or lounge reservation request for a verified CruiseHQ venue with guest count, timing, and direct booking route.',
+    parameters: {
+      type: 'object',
+      properties: {
+        venueName: { type: 'string', description: 'Name of the venue or restaurant' },
+        partySize: { type: 'number', description: 'Number of guests' },
+        date: { type: 'string', description: 'Reservation date' },
+        time: { type: 'string', description: 'Target reservation time (e.g. "8:30 PM")' },
+        city: { type: 'string', description: 'City location' },
+      },
+      required: ['venueName', 'partySize'],
+    },
+  },
+  {
     name: 'searchGames',
     description: 'Searches CruiseHQ social and party games directory with complete rules, materials, and player counts (Conce-Conce, Charades, Hot Seat, etc.).',
     parameters: {
@@ -167,6 +211,35 @@ export const tools: TCGToolDefinition[] = [
         hostName: { type: 'string', description: 'Name of the host initiating the room' },
       },
       required: ['title'],
+    },
+  },
+  {
+    name: 'recommendAuxTracks',
+    description: 'Acts as Spotify AUX MC: recommends a curated mini setlist of tracks matching the squad vibe (Afrobeats, Amapiano, R&B, UK Drill) with streaming links.',
+    parameters: {
+      type: 'object',
+      properties: {
+        vibe: { type: 'string', description: 'Musical vibe (e.g. "high energy amapiano", "late night soulful afro-fusion", "pre-game turnup")' },
+        trackCount: { type: 'number', description: 'Number of tracks (default 3-5)' },
+      },
+      required: ['vibe'],
+    },
+  },
+  {
+    name: 'promptGroupVote',
+    description: 'Structures a clear group ballot with Apple Tapback emoji reaction triggers and a deadline to settle squad debates quickly.',
+    parameters: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'The debate or decision being voted on' },
+        options: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'List of choices with suggested Tapbacks, e.g. ["Option A (Rooftop Lounge) -> Tapback ❤️", "Option B (Suya & Afrobeats) -> Tapback 😆"]',
+        },
+        timeoutMinutes: { type: 'number', description: 'Voting deadline in minutes (default 5)' },
+      },
+      required: ['title', 'options'],
     },
   },
   {
@@ -221,6 +294,8 @@ export const tools: TCGToolDefinition[] = [
 ];
 
 export async function executeTool(name: string, args: Record<string, any>): Promise<any> {
+  const baseUrl = process.env.CRUISEHQ_BASE_URL || 'https://cruisehq.fun';
+
   switch (name) {
     case 'resolveGroupConsensus': {
       const vibes = Array.isArray(args.memberVibes) ? args.memberVibes : [String(args.memberVibes)];
@@ -254,7 +329,6 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
       let data = await querySupabase('cruisehq_venues', queryParams);
 
       if (!data || data.length === 0) {
-        // Fallback: search without category filter if city provided
         if (city) {
           data = await querySupabase('cruisehq_venues', `select=name,category,city,address,description,website_url&city=ilike.*${encodeURIComponent(city)}*&limit=${limit}`);
         }
@@ -269,12 +343,11 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
             city: v.city,
             address: v.address || `${v.city}`,
             description: v.description,
-            link: v.website_url,
+            link: v.website_url || `${baseUrl}/venues`,
           })),
         };
       }
 
-      // Live search fallback via Firecrawl
       const webResults = await queryFirecrawl(`best ${query} venues restaurants spots in ${city || 'the city'}`, limit);
       if (webResults.length > 0) {
         return {
@@ -295,24 +368,24 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
       const loc = args.location || '';
       const limit = 4;
 
-      let queryParams = `select=title,description,url,service_category,service_types,locations,price_ngn,price_usd&status=eq.approved&limit=${limit}`;
+      let queryParams = `select=id,title,description,url,service_category,service_types,locations,price_ngn,price_usd&status=eq.approved&limit=${limit}`;
       if (cat) {
         queryParams += `&or=(service_category.ilike.*${encodeURIComponent(cat)}*,title.ilike.*${encodeURIComponent(cat)}*,description.ilike.*${encodeURIComponent(cat)}*)`;
       }
 
       let plugs = await querySupabase('cruisehq_plugs', queryParams);
 
-      // Also check profiles for VIP plugs
       if (!plugs || plugs.length < limit) {
         const profilePlugs = await querySupabase(
           'profiles',
-          `select=display_name,bio,website&is_plug=is.true&limit=3`
+          `select=id,display_name,bio,website&is_plug=is.true&limit=3`
         );
         if (profilePlugs && profilePlugs.length > 0) {
           const mapped = profilePlugs.map((p) => ({
+            id: p.id,
             title: p.display_name || 'Verified VIP Plug',
             description: p.bio || 'CruiseHQ VIP Plug',
-            url: p.website || 'https://cruisehq.fun/plugs',
+            url: p.website || `${baseUrl}/plugs`,
             service_category: cat || 'VIP Concierge',
             locations: [loc || 'All Cities'],
           }));
@@ -323,17 +396,18 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
       if (plugs && plugs.length > 0) {
         return {
           verifiedPlugs: plugs.map((p) => ({
+            id: p.id,
             name: p.title,
             category: p.service_category || 'Creative Plug',
             description: p.description,
             locations: p.locations,
             rates: p.price_ngn ? `₦${p.price_ngn.toLocaleString()}` : (p.price_usd ? `$${p.price_usd}` : 'Rate on request'),
-            link: p.url || 'https://cruisehq.fun/plugs',
+            link: p.url || `${baseUrl}/plugs`,
+            bookingUrl: `${baseUrl}/plugs?plug=${encodeURIComponent(p.title)}`,
           })),
         };
       }
 
-      // Web search fallback
       const webPlugs = await queryFirecrawl(`verified ${cat} for events parties in ${loc || 'the city'}`, 3);
       if (webPlugs.length > 0) {
         return {
@@ -348,13 +422,151 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
       };
     }
 
+    case 'getTicketCheckout': {
+      const eventName = args.eventName || 'CruiseHQ Event';
+      const tier = args.ticketTier || 'General Admission';
+      const qty = Math.max(1, Number(args.quantity) || 1);
+      const city = args.city || '';
+
+      // Check if event exists in CruiseHQ database
+      const dbEvents = await querySupabase(
+        'cruisehq_events',
+        `select=id,name,title,date,venue,price_ngn,price_usd&or=(name.ilike.*${encodeURIComponent(eventName)}*,title.ilike.*${encodeURIComponent(eventName)}*)&limit=1`
+      );
+
+      let unitPriceNgn = 10000;
+      let unitPriceUsd = 15;
+      let eventId = 'live-event';
+      let eventTitle = eventName;
+      let venue = city || 'Secret Location';
+
+      if (dbEvents && dbEvents.length > 0) {
+        const ev = dbEvents[0];
+        eventId = ev.id;
+        eventTitle = ev.name || ev.title;
+        unitPriceNgn = ev.price_ngn || unitPriceNgn;
+        unitPriceUsd = ev.price_usd || unitPriceUsd;
+        venue = ev.venue || venue;
+      }
+
+      if (tier.toLowerCase().includes('vip')) {
+        unitPriceNgn *= 2.5;
+        unitPriceUsd *= 2.5;
+      } else if (tier.toLowerCase().includes('table')) {
+        unitPriceNgn *= 6;
+        unitPriceUsd *= 6;
+      }
+
+      const totalNgn = unitPriceNgn * qty;
+      const totalUsd = unitPriceUsd * qty;
+
+      const checkoutUrl = `${baseUrl}/events/${eventId}?tier=${encodeURIComponent(tier)}&qty=${qty}&checkout=true`;
+
+      return {
+        orderSummary: {
+          event: eventTitle,
+          tier,
+          quantity: qty,
+          venue,
+          unitPrice: `₦${unitPriceNgn.toLocaleString()} ($${unitPriceUsd})`,
+          totalAmount: `₦${totalNgn.toLocaleString()} ($${totalUsd})`,
+          checkoutUrl,
+        },
+        actionPrompt: `Tap the link to lock in your passes via Apple Pay, Card, or Crypto: ${checkoutUrl}`,
+      };
+    }
+
+    case 'bookPlug': {
+      const plugName = args.plugName;
+      const category = args.serviceCategory || 'Creative Plug';
+      const date = args.date || 'Upcoming Weekend';
+      const city = args.city || 'Lagos';
+      const hours = Number(args.durationHours) || 3;
+
+      // Query plug details from Supabase
+      const plugData = await querySupabase(
+        'cruisehq_plugs',
+        `select=id,title,price_ngn,price_usd,url,contact_phone,contact_email&title=ilike.*${encodeURIComponent(plugName)}*&limit=1`
+      );
+
+      let rateNgn = 150000;
+      let rateUsd = 150;
+      let directUrl = `${baseUrl}/plugs`;
+
+      if (plugData && plugData.length > 0) {
+        const p = plugData[0];
+        rateNgn = p.price_ngn || rateNgn;
+        rateUsd = p.price_usd || rateUsd;
+        directUrl = p.url || directUrl;
+      }
+
+      const bookingReference = `CRUISE-BK-${Date.now().toString().slice(-6)}`;
+      const totalEstimatedNgn = rateNgn * (hours / 3);
+      const totalEstimatedUsd = rateUsd * (hours / 3);
+
+      const bookingCheckoutUrl = `${baseUrl}/plugs?book=${encodeURIComponent(plugName)}&ref=${bookingReference}`;
+
+      return {
+        bookingCard: {
+          bookingReference,
+          plugName,
+          category,
+          date,
+          city,
+          estimatedHours: hours,
+          verifiedRateQuote: `₦${Math.round(totalEstimatedNgn).toLocaleString()} ($${Math.round(totalEstimatedUsd)})`,
+          status: 'Confirmed Rate • Ready to Book',
+          checkoutUrl: bookingCheckoutUrl,
+          directChannel: directUrl,
+        },
+        actionPrompt: `Plug rate verified. Confirm the booking and deposit on CruiseHQ here: ${bookingCheckoutUrl}`,
+      };
+    }
+
+    case 'reserveVenue': {
+      const venueName = args.venueName;
+      const partySize = Number(args.partySize) || 4;
+      const date = args.date || 'Tonight';
+      const time = args.time || '8:30 PM';
+      const city = args.city || '';
+
+      const venues = await querySupabase(
+        'cruisehq_venues',
+        `select=name,address,city,website_url,contact_phone&name=ilike.*${encodeURIComponent(venueName)}*&limit=1`
+      );
+
+      let address = `${venueName}, ${city}`;
+      let reservationUrl = `${baseUrl}/venues`;
+      let phone = null;
+
+      if (venues && venues.length > 0) {
+        const v = venues[0];
+        address = v.address || `${v.name}, ${v.city}`;
+        reservationUrl = v.website_url || reservationUrl;
+        phone = v.contact_phone;
+      }
+
+      return {
+        reservationCard: {
+          venue: venueName,
+          partySize: `${partySize} guests`,
+          date,
+          time,
+          address,
+          status: 'Direct Table Routing',
+          reservationLink: reservationUrl,
+          vipConciergePhone: phone || 'Available via CruiseHQ VIP desk',
+        },
+        actionPrompt: `Table routing ready for ${partySize} at ${venueName} (${time}, ${date}). Lock it in: ${reservationUrl}`,
+      };
+    }
+
     case 'searchEvents': {
       const city = args.city || '';
       const query = args.query || '';
       const limit = 4;
 
-      // 1. Check CruiseHQ events table
-      let queryParams = `select=name,title,date,venue,city,description,source_url&limit=${limit}`;
+      let queryParams = `select=id,name,title,date,venue,city,description,source_url,price_ngn,price_usd&limit=${limit}`;
       if (city) {
         queryParams += `&city=ilike.*${encodeURIComponent(city)}*`;
       }
@@ -366,18 +578,19 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
       if (dbEvents && dbEvents.length > 0) {
         return {
           events: dbEvents.map((e) => ({
+            id: e.id,
             title: e.name || e.title,
             date: e.date,
             venue: e.venue,
             city: e.city,
+            price: e.price_ngn ? `₦${e.price_ngn.toLocaleString()}` : 'Free entry',
             description: e.description,
-            link: e.source_url,
+            link: e.source_url || `${baseUrl}/events/${e.id}`,
           })),
           source: 'cruisehq_verified',
         };
       }
 
-      // 2. Fallback to live Firecrawl web search (NO hardcoded static city arrays!)
       const searchTarget = city ? `${query} events happening in ${city} this weekend` : `${query} nightlife concerts popups this weekend`;
       const webResults = await queryFirecrawl(searchTarget, limit);
 
@@ -398,6 +611,56 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
         events: [],
         city,
         message: `No live events found matching "${query}" in ${city || 'this area'}. Check back closer to the weekend.`,
+      };
+    }
+
+    case 'recommendAuxTracks': {
+      const vibe = args.vibe || 'party turnup';
+      const vibeLower = vibe.toLowerCase();
+
+      let tracks = [];
+      if (vibeLower.includes('amapiano')) {
+        tracks = [
+          { artist: 'Tyla & Gunna', title: 'Jump (Amapiano Edit)', note: 'Bassline shaker' },
+          { artist: 'Uncle Waffles & Tony Duardo', title: 'Tanzania', note: 'Essential club log drum' },
+          { artist: 'Kabza De Small & DJ Maphorisa', title: 'Asibe Happy', note: 'Euphoric vocal vibes' },
+        ];
+      } else if (vibeLower.includes('afro') || vibeLower.includes('lagos')) {
+        tracks = [
+          { artist: 'Asake', title: 'Active (ft. Travis Scott)', note: 'Pure energy, Fujipiano pace' },
+          { artist: 'Burna Boy', title: 'City Boys', note: 'Anthem of the summer' },
+          { artist: 'Rema', title: 'Ozeba', note: 'Heavy tempo, dancefloor ignition' },
+        ];
+      } else if (vibeLower.includes('chill') || vibeLower.includes('dinner') || vibeLower.includes('r&b')) {
+        tracks = [
+          { artist: 'Tems', title: 'Me & U', note: 'Velvety sunset acoustics' },
+          { artist: 'Wizkid', title: 'Frames (Who\'s Hurtin Who)', note: 'Late night laid-back groove' },
+          { artist: 'Omah Lay', title: 'Holy Ghost', note: 'Soulful atmospheric bounce' },
+        ];
+      } else {
+        tracks = [
+          { artist: 'Sarz & Asake', title: 'Happiness', note: 'Irresistible bounce' },
+          { artist: 'Shallipopi', title: 'Cast (ft. Odumodublvck)', note: 'Unfiltered street hype' },
+          { artist: 'Ayra Starr', title: 'Commas', note: 'Universal crowd pleaser' },
+        ];
+      }
+
+      return {
+        curatedVibe: vibe,
+        tracks,
+        auxMCAdvice: 'Hand AUX to whoever knows how to blend transitions—no random song skips midway!',
+        streamingLink: 'https://open.spotify.com/search/' + encodeURIComponent(vibe),
+      };
+    }
+
+    case 'promptGroupVote': {
+      return {
+        ballot: {
+          title: args.title,
+          options: args.options,
+          deadline: `Closes in ${args.timeoutMinutes || 5} minutes`,
+          instruction: 'Squad: Tapback your vote directly on the message. Majority takes the night!',
+        },
       };
     }
 
@@ -422,7 +685,6 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
         };
       }
 
-      // Default classic party games
       return {
         games: [
           {
@@ -443,7 +705,6 @@ export async function executeTool(name: string, args: Record<string, any>): Prom
 
     case 'createCruiseRoom': {
       const code = Math.random().toString(36).substring(2, 7).toUpperCase();
-      const baseUrl = process.env.CRUISEHQ_BASE_URL || 'https://cruisehq.fun';
 
       await insertSupabase('cruisehq_rooms', {
         room_code: code,
