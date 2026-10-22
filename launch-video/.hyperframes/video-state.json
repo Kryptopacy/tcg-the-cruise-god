@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "historyId": "9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04",
+  "currentRevision": null,
+  "pendingChanges": false,
+  "files": {
+    "assets/cover.png": {
+      "hash": "d64c3fa005d21a1b7c46a450d4c29cb8c5d73994229ba75a3fdea8c43e807377",
+      "content": "C:\\Users\\dev.zoro\\.cache\\hyperframes\\history\\9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04\\blobs\\d6\\d64c3fa005d21a1b7c46a450d4c29cb8c5d73994229ba75a3fdea8c43e807377"
+    },
+    "assets/cruisehq-logo.png": {
+      "hash": "fc3ebd11d6f135c843b019e799e9f912588e0b4092bcbe081439005078ba6f8d",
+      "content": "C:\\Users\\dev.zoro\\.cache\\hyperframes\\history\\9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04\\blobs\\fc\\fc3ebd11d6f135c843b019e799e9f912588e0b4092bcbe081439005078ba6f8d"
+    },
+    "assets/tcg-character.png": {
+      "hash": "9738a95e2783063c34b7d8dd3ea8add7f678d017683b9e5fc85f64229073bc62",
+      "content": "C:\\Users\\dev.zoro\\.cache\\hyperframes\\history\\9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04\\blobs\\97\\9738a95e2783063c34b7d8dd3ea8add7f678d017683b9e5fc85f64229073bc62"
+    },
+    "assets/tcg-logo.png": {
+      "hash": "a67a457837f5b4c8b4ca52ae2b77fb772915d657f537ad6c47f14b783c55b627",
+      "content": "C:\\Users\\dev.zoro\\.cache\\hyperframes\\history\\9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04\\blobs\\a6\\a67a457837f5b4c8b4ca52ae2b77fb772915d657f537ad6c47f14b783c55b627"
+    },
+    "hyperframes.json": {
+      "hash": "53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50",
+      "content": "C:\\Users\\dev.zoro\\.cache\\hyperframes\\history\\9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04\\blobs\\53\\53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50"
+    },
+    "index.html": {
+      "hash": "79d6fd8e79863c432811e302fed376c89e5b7bd3f89290f1f07cc35b27547a5f",
+      "content": "C:\\Users\\dev.zoro\\.cache\\hyperframes\\history\\9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04\\blobs\\79\\79d6fd8e79863c432811e302fed376c89e5b7bd3f89290f1f07cc35b27547a5f"
+    },
+    "make-score.mjs": {
+      "hash": "8ee69d998bb8fa65ff7df0c12a04afd7a9d7d8d8d96887ecf73a21fe6e8860a9",
+      "content": "C:\\Users\\dev.zoro\\.cache\\hyperframes\\history\\9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04\\blobs\\8e\\8ee69d998bb8fa65ff7df0c12a04afd7a9d7d8d8d96887ecf73a21fe6e8860a9"
+    },
+    "meta.json": {
+      "hash": "018b239f4c09786ad76ff142c4682c714a54008b6d3502597686ddec3a98e336",
+      "content": "C:\\Users\\dev.zoro\\.cache\\hyperframes\\history\\9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04\\blobs\\01\\018b239f4c09786ad76ff142c4682c714a54008b6d3502597686ddec3a98e336"
+    },
+    "package.json": {
+      "hash": "49f1a2b682354268ec6ff3fa2d79fe82c5b9c9f2d52471b04a86f3ca17bb0628",
+      "content": "C:\\Users\\dev.zoro\\.cache\\hyperframes\\history\\9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04\\blobs\\49\\49f1a2b682354268ec6ff3fa2d79fe82c5b9c9f2d52471b04a86f3ca17bb0628"
+    },
+    "assets/score.wav": {
+      "hash": "8e86fd87ffc52f640074e58399a71f8d602a5f6d099afa1d6efa125ada82cc0d",
+      "content": "C:\\Users\\dev.zoro\\.cache\\hyperframes\\history\\9e5b96d9-bfb1-42f8-984c-1cd1cd9e7c04\\blobs\\8e\\8e86fd87ffc52f640074e58399a71f8d602a5f6d099afa1d6efa125ada82cc0d"
+    }
+  },
+  "revisions": {},
+  "checks": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "snapshots": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "renders": {
+    "latest": {
+      "id": "35479924-4dc4-4d67-934c-6886042fddf4",
+      "completedAt": 1792705488182,
+      "output": "D:\\pacy_labs\\tcg-the-cruise-god\\launch-video\\out\\tcg-launch-demo.mp4",
+      "status": "completed",
+      "revision": null
+    },
+    "retainedRevisions": []
+  },
+  "pendingArtifactCleanup": []
+}
