@@ -19,16 +19,28 @@ async function runTests() {
       name: 'Scenario 2: Verified CruiseHQ Creative Plug Lookup',
       sender: 'Marcus',
       chatId: 'squad-group-chat-01',
-      input: 'We need a mobile mixologist for our pre-drinks in Lagos tonight.',
+      input: 'We need a DJ or mobile mixologist for our party in Lagos tonight.',
     },
     {
-      name: 'Scenario 3: Interactive Multiplayer Room Creation (CruiseHQ Sync)',
+      name: 'Scenario 3: CruiseHQ Verified Venues & Lounges',
+      sender: 'Dave',
+      chatId: 'squad-group-chat-01',
+      input: 'Find us some verified party spots or clubs in Ilorin or Lagos on CruiseHQ.',
+    },
+    {
+      name: 'Scenario 4: CruiseHQ Party Game Protocol (Conce-Conce)',
+      sender: 'Sarah',
+      chatId: 'squad-group-chat-01',
+      input: 'How do we play Conce-Conce? Explain the rules so we can play in the chat.',
+    },
+    {
+      name: 'Scenario 5: Interactive Multiplayer Room Creation (CruiseHQ Sync)',
       sender: 'Sarah',
       chatId: 'squad-group-chat-01',
       input: 'Spin up an arcade room for the squad right now.',
     },
     {
-      name: 'Scenario 4: Instant Group Bill Split',
+      name: 'Scenario 6: Instant Group Bill Split',
       sender: 'Marcus',
       chatId: 'squad-group-chat-01',
       input: 'Split a 65,000 naira suya bill between 4 of us with 10% tip.',
@@ -56,7 +68,7 @@ async function runTests() {
 
   console.log('===============================================================');
   console.log('🎉 All TCG Agent smoke tests completed successfully!');
-  console.log('   Ready for Devpost judging and live iMessage deployment.');
+  console.log('   Ready for live iMessage deployment.');
   console.log('===============================================================');
 }
 

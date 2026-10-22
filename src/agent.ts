@@ -1,4 +1,4 @@
-import { TCG_SYSTEM_PROMPT } from './prompt.ts';
+import { buildSystemPrompt } from './prompt.ts';
 import { tools, executeTool } from './tools.ts';
 
 export interface MediaAttachment {
@@ -12,8 +12,14 @@ export interface ChatPart {
     mimeType: string;
     data: string;
   };
-  functionCall?: any;
-  functionResponse?: any;
+  functionCall?: {
+    name: string;
+    args: Record<string, any>;
+  };
+  functionResponse?: {
+    name: string;
+    response: Record<string, any>;
+  };
 }
 
 export interface ChatMessage {
@@ -34,6 +40,46 @@ export class TCGEngine {
     this.model = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
   }
 
+  private cleanReply(text: string): string {
+    return text
+      .replace(/^\[Sender:\s*[^\]]+\]\s*/i, '')
+      .replace(/^TCG:\s*/i, '')
+      .trim();
+  }
+
+  private async callGeminiWithRetry(endpoint: string, payload: any, maxRetries: number = 2): Promise<any> {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        if (res.ok) return data;
+
+        // If 503 or 429, wait briefly and retry
+        if ((res.status === 503 || res.status === 429) && attempt < maxRetries) {
+          console.warn(`Gemini API returned ${res.status}, retrying in ${(attempt + 1) * 1500}ms...`);
+          await new Promise((r) => setTimeout(r, (attempt + 1) * 1500));
+          continue;
+        }
+
+        console.error('Gemini API Error:', data);
+        return null;
+      } catch (e: any) {
+        if (attempt < maxRetries) {
+          await new Promise((r) => setTimeout(r, (attempt + 1) * 1000));
+          continue;
+        }
+        console.error('Gemini network exception:', e);
+        return null;
+      }
+    }
+    return null;
+  }
+
   async processMessage(
     chatId: string,
     sender: string,
@@ -46,12 +92,17 @@ export class TCGEngine {
       this.history.set(chatId, chatHistory);
     }
 
-    const parts: ChatPart[] = [];
-    const userMessageContent = `[Sender: ${sender}]\n${incomingText}`;
-    parts.push({ text: userMessageContent });
+    const isGroup = chatId.includes('-group-') || chatId.startsWith('group:') || sender !== 'Direct';
+    const systemPrompt = buildSystemPrompt({
+      chatType: isGroup ? 'group' : 'direct',
+    });
+
+    const userParts: ChatPart[] = [];
+    const formattedText = `[Sender: ${sender}]\n${incomingText}`;
+    userParts.push({ text: formattedText });
 
     if (media) {
-      parts.push({
+      userParts.push({
         inlineData: {
           mimeType: media.mimeType,
           data: media.data,
@@ -59,22 +110,25 @@ export class TCGEngine {
       });
     }
 
-    chatHistory.push({
+    const pendingUserMessage: ChatMessage = {
       role: 'user',
-      parts,
-    });
+      parts: userParts,
+    };
 
-    if (chatHistory.length > 20) {
-      chatHistory.splice(0, chatHistory.length - 20);
+    const currentHistory = [...chatHistory, pendingUserMessage];
+
+    // Keep history manageable
+    if (currentHistory.length > 20) {
+      currentHistory.splice(0, currentHistory.length - 20);
     }
 
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
 
     const payload = {
       systemInstruction: {
-        parts: [{ text: TCG_SYSTEM_PROMPT }],
+        parts: [{ text: systemPrompt }],
       },
-      contents: chatHistory,
+      contents: currentHistory,
       tools: [
         {
           functionDeclarations: tools.map((t) => ({
@@ -86,73 +140,76 @@ export class TCGEngine {
       ],
     };
 
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+    const data = await this.callGeminiWithRetry(endpoint, payload);
+    if (!data) {
+      return "Line dropped for a second. Run that by me one more time?";
+    }
 
-      const data = await res.json();
-      if (!res.ok) {
-        console.error('Gemini API Error:', data);
-        return "Line dropped for a sec. Run that by me one more time?";
-      }
+    const candidate = data.candidates?.[0];
+    const parts = candidate?.content?.parts || [];
 
-      const candidate = data.candidates?.[0];
-      const parts = candidate?.content?.parts || [];
+    // Check for function calls
+    const functionCallPart = parts.find((p: any) => p.functionCall);
+    if (functionCallPart && functionCallPart.functionCall) {
+      const { name, args } = functionCallPart.functionCall;
+      console.log(`⚡ [TCG TOOL]: ${name}`, args);
 
-      // Check for function calls
-      const functionCallPart = parts.find((p: any) => p.functionCall);
-      if (functionCallPart) {
-        const { name, args } = functionCallPart.functionCall;
-        console.log(`⚡ [TCG TOOL]: ${name}`, args);
+      const toolResult = await executeTool(name, args || {});
 
-        const toolResult = await executeTool(name, args || {});
-
-        // Send tool output back to model for final reply
-        const followUpPayload = {
-          systemInstruction: {
-            parts: [{ text: TCG_SYSTEM_PROMPT }],
+      // Standard Gemini Function Response Turn
+      // CRITICAL: Preserve candidate.content.parts verbatim so thought_signature
+      // and internal metadata required by Gemini 2.5/3.x are retained!
+      const followUpPayload = {
+        systemInstruction: {
+          parts: [{ text: systemPrompt }],
+        },
+        contents: [
+          ...currentHistory,
+          {
+            role: 'model',
+            parts: candidate.content.parts,
           },
-          contents: [
-            ...chatHistory,
-            {
-              role: 'model',
-              parts: [{ functionCall: { name, args } }],
-            },
-            {
-              role: 'user',
-              parts: [
-                {
-                  text: `Tool '${name}' returned:\n${JSON.stringify(toolResult)}\nNow reply conversationally to the user in iMessage format.`,
+          {
+            role: 'user',
+            parts: [
+              {
+                functionResponse: {
+                  name,
+                  response: { result: toolResult },
                 },
-              ],
-            },
-          ],
-        };
+              },
+            ],
+          },
+        ],
+      };
 
-        const followUpRes = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(followUpPayload),
-        });
-
-        const followUpData = await followUpRes.json();
+      const followUpData = await this.callGeminiWithRetry(endpoint, followUpPayload);
+      if (followUpData) {
         const finalCandidate = followUpData.candidates?.[0];
         let finalReply = finalCandidate?.content?.parts?.[0]?.text || "Locked in. That's the move.";
-        finalReply = finalReply.replace(/^\[Sender:\s*[^\]]+\]\s*/i, '').trim();
-        chatHistory.push({ role: 'model', parts: [{ text: finalReply }] });
+        finalReply = this.cleanReply(finalReply);
+
+        // Commit successful exchange to history
+        chatHistory.push(pendingUserMessage);
+        chatHistory.push({
+          role: 'model',
+          parts: [{ text: finalReply }],
+        });
         return finalReply;
       }
-
-      let textReply = parts[0]?.text || "Talk to me. What's the plan?";
-      textReply = textReply.replace(/^\[Sender:\s*[^\]]+\]\s*/i, '').trim();
-      chatHistory.push({ role: 'model', parts: [{ text: textReply }] });
-      return textReply;
-    } catch (err: any) {
-      console.error('TCG Engine Execution Error:', err);
-      return "Signal hit a bump. What did you say?";
     }
+
+    // Standard text response
+    let textReply = parts[0]?.text || "Talk to me. What's the plan?";
+    textReply = this.cleanReply(textReply);
+
+    // Commit successful exchange to history
+    chatHistory.push(pendingUserMessage);
+    chatHistory.push({
+      role: 'model',
+      parts: [{ text: textReply }],
+    });
+
+    return textReply;
   }
 }
