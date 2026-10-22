@@ -1,6 +1,7 @@
 # 🚢 TCG (The Cruise God) — Autonomous Social Concierge & Squad Host on iMessage
 
 > **Built for Photon's "Make Your Own Muse" Hackathon**  
+> **Target Category:** ⚡ **The Most Unhinged Muse**  
 > *A charismatic, culturally tapped-in autonomous social agent living natively in Apple iMessage group chats.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
