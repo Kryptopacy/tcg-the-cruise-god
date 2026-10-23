@@ -39,7 +39,8 @@ export class TCGEngine {
     if (!this.apiKey) {
       throw new Error('GEMINI_API_KEY environment variable is missing.');
     }
-    this.model = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+    this.model = process.env.GEMINI_MODEL || 'gemini-flash-lite-latest';
+    this.fallbackModel = this.model === 'gemini-flash-lite-latest' ? 'gemini-3.5-flash-lite' : 'gemini-flash-lite-latest';
   }
 
   private cleanReply(text: string): string {
