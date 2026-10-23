@@ -39,7 +39,7 @@ export class TCGEngine {
     if (!this.apiKey) {
       throw new Error('GEMINI_API_KEY environment variable is missing.');
     }
-    this.model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+    this.model = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
   }
 
   private cleanReply(text: string): string {
@@ -62,9 +62,9 @@ export class TCGEngine {
         const data = await res.json();
         if (res.ok) return data;
 
-        // If 429 quota exhaustion on primary model, immediately pivot to high-quota fallback model
-        if (res.status === 429 && endpoint.includes(this.model) && this.model !== this.fallbackModel) {
-          console.warn(`⚠️ [TCG Engine] ${this.model} free-tier daily cap reached. Transparently routing to ${this.fallbackModel}...`);
+        // If 429 quota exhaustion or 503 capacity spike on primary model, immediately pivot to high-quota fallback model
+        if ((res.status === 429 || res.status === 503) && endpoint.includes(this.model) && this.model !== this.fallbackModel) {
+          console.warn(`⚠️ [TCG Engine] ${this.model} unavailable (${res.status}). Transparently routing to ${this.fallbackModel}...`);
           const fallbackEndpoint = endpoint.replace(this.model, this.fallbackModel);
           return await this.callGeminiWithRetry(fallbackEndpoint, payload, maxRetries);
         }
